@@ -1,0 +1,29 @@
+.PROGRAM pick_place()
+		GLOBAL picture_pos, location
+		GLOBAL REAL depart_disp, instance_count
+		$ip = "192.168.22.10"
+		PARAMETER VIMTEOUT = 5
+		SPEED 50 ALWAYS
+		depar_dist = 20
+		MOVE home					; here home
+		SET picture_pos = HERE
+		MOVE pivture_pos
+		VRUN $ip, 1
+		VWAITI (1) $ip, 0
+		VPARAMETER(1, 2, 530) $ip = 3
+		instance_count = VRESULT($ip, 1, 2, 1, 1310)
+		FOR i = 1 TO instance_count
+			SET location = VLOCATION($ip, 1, 2, i, 1311)
+			APPRO location, depart_dist
+			SPEED 5
+			MOVES location
+			BREAK
+			SIGNAL 1, -2
+			WAIT.EVENT , 0.5
+			DEPART depart_dist
+			MOVE home
+			DELAY 1
+			SIGNAL -1, 2
+			WAIT.EVENT , 0.5
+		END
+.END

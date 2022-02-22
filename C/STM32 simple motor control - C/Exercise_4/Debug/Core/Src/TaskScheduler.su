@@ -1,0 +1,3 @@
+TaskScheduler.c:23:6:TaskScheduler_Start	8	static
+TaskScheduler.c:30:6:TaskScheduler_Tick	4	static
+TaskScheduler.c:36:6:TaskScheduler_Run	16	static

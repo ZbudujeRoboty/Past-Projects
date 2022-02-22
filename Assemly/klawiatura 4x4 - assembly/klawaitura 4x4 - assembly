@@ -1,0 +1,48 @@
+;OBSLUGA KLAWIATURY 4x4
+	LJMP INIT				;Skok do etykiety INIT
+	
+ORG 001BH					;Wektor dla przerwan z czamierza T1
+	
+	LJMP IRQT1				;Skok do etykiety IRQT1 zawierajacej instrukcje dla przerwania
+	
+ORG 0050H					;Nastepne instrukcje zapisywane w pamieci programu od miejsca 50H
+
+INIT:						;Etykieta INIT
+	MOV P2, #0FFH				;Przypisanie do portu 2 samych jedynek (odpowiedzialny za wiersze klawiatury)
+	MOV IE, #10001000B			;Wlaczenie systemu przerwan i uaktywnienie przerwania od T1
+						;IP nie jest ustawiane, poniewaz przerwania beda z jednego zrodla i nie potrzebna jest priorytetowosc 
+	MOV TMOD, #00100000B			;Licznik T1 jako czasomierz na tryb 2 (bez bramkowania)
+	MOV TH1, #05H				;Ustawienie TH1(po przepelnieniu w TL1 bedzie ta wartosc)
+	MOV TL1, #05H				;Ustawienie TL1(Od tej wartości zacznie się zliczanie)
+	MOV TCON, #01000000B			;Wlaczenie bitu TR1 sterujacego zliczaniem T1(Od tego momentu licznik pracuje)
+	LJMP START				;Skok do etykiety START
+	
+ORG 100H					;Nastepne instrukcje zapisywane w pamieci programu od miejsca 100H
+
+START:					;Etyieta START (program glowny)
+	INC R7					;Inkrementacja rejestru R7 (wizualizacja dzialania programu glownego)
+	LJMP START				;Skok do etykiety START (zapetlenie programu glownego)
+	
+ORG 200H					;Nastepne instrukcje zapisywane w pamieci progamu od miejsca 200H
+
+IRQT1:					;Etkieta przerwania IRQT1
+	INC R4					;Inkrementacja rejestru R4 (licznik pomocniczy dla opoznienia)
+	CJNE R4,#50H,KONIEC			;Procedura wykona sie co 50 raz (opoznienie)
+	MOV R4,#00H				;Zresetowanie wartosci w rejestrze R4
+	MOV P1,#0FEH				;Do P1 11111110B (odpowiedzialny za kolumny klawiatury) - 1 kolumna
+	MOV 40H,P2				;Zapisanie do komorki 40H wartosci z P2 (stan wierszy)
+	MOV A,P1				;Przepisanie do akumulatora wartosci z portu P1
+	RL A					;Przesuniecie w lewo zawartosi akumulatora
+	MOV P1, A				;do P1 11111101B - kolumna 2
+	MOV 41H,P2				;Zapisanie do komorki 41H wartosci z P2 (stan wierszy)
+	MOV A,P1				;Przepisanie do akumulatora wartosci z portu P1
+	RL A					;Przesuniecie w lewo zawartosi akumulatora
+	MOV P1,A				;do P1 11111011B - kolumna 3
+	MOV 42H,P2				;Zapisanie do komorki 42H wartosci z P2 (stan wierszy)
+	MOV A,P1				;Przepisanie do akumulatora wartosci z portu P1
+	RL A					;Przesuniecie w lewo zawartosi akumulatora
+	MOV P1, A				;do P1 11110111B - kolumna 4
+	MOV 43H,P2				;Zapisanie do komorki 43H wartosci z P2 (stan wierszy)
+	KONIEC: RETI				;Pocnicza etykieta KONEIC oraz etykiera RETI powracajaca do momentu w ktorym nastapilo przerwanie (w programie glownym)
+						;W komorkach 40H, 41H, 42H i 43H zostaly zapisane stany wierszy przy sprawdzaniu kolejnych kolumn. W ten sposob mozemy jednoznacznie zindentyfikowac ktory przycisk w danej chwili zostal wcisniety. Na przyklad jezeli przy sprawdzaniu kolumny 1 do komorki 40H zostala zapisana wartosc #0FEH z P2 to oznacza to, ze jest nacisniety przycisk w pierwszym wierszu (i oczywiscie w pierwszej kolumnie). 
+END	;Zasygnalizowanie końca kodu

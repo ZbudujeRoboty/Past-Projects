@@ -1,0 +1,6 @@
+MotorController.c:33:6:MotorController_Start	8	static
+MotorController.c:45:6:MotorController_Stop	8	static
+MotorController.c:56:6:MotorController_Change_Direction	8	static
+MotorController.c:73:13:MotorController_Set_Driver_Mode	16	static
+MotorController.c:78:13:MotorController_Set_Direction	16	static
+MotorController.c:83:13:MotorController_Set_PWM	16	static
